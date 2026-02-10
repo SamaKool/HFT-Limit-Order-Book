@@ -24,7 +24,7 @@ Tested on [Your CPU Name, e.g., Intel Core i5/i7 / Apple M1]:
 | **Test Size** | 10,000 orders |
 
 ## Result
-![alt text](image.png)
+![alt text](Result.png)
 
 ## Architecture
 

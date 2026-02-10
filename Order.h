@@ -9,11 +9,7 @@ struct Order {
     double price;
     int quantity;
 
-    // Helper to print order details easily
-    void print() const {
-        // Simple print for debugging
-        // (In a real system, we'd use a logging library, but this works for now)
-    }
+    void print() const {}
 };
 
 #endif

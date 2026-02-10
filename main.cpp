@@ -1,36 +1,41 @@
 #include <iostream>
 #include "OrderBook.h"
-#include <chrono> // For benchmarking
+#include "ObjectPool.h"
+#include <chrono>
 
 int main() {
     OrderBook book;
 
+    // Initialize the Pool (Allocate 100,000 orders upfront)
+    std::cout << "Initializing Memory Pool...\n";
+    ObjectPool<Order> orderPool(100000);
+
     std::cout << "--- HFT Order Book Simulation ---\n";
 
-    // 1. Add some liquidity (Sellers sitting in the book)
-    book.addOrder({ 1, OrderType::SELL, 100.50, 10 });
-    book.addOrder({ 2, OrderType::SELL, 101.00, 20 });
-
-    // 2. Aggressive Buyer comes in
-    // He wants to buy 15 shares at 101.00.
-    // He should eat the 10 shares at 100.50 first, then take 5 from 101.00.
-    std::cout << "\n--- Incoming Aggressive Buy Order ---\n";
-    book.addOrder({ 3, OrderType::BUY, 101.00, 15 });
-
-    // 3. Benchmarking Section (The "Citadel" Flex)
-    std::cout << "\n--- Performance Test ---\n";
+    // Benchmarking with the Pool
+    std::cout << "\n--- Performance Test (Zero Allocation) ---\n";
     auto start = std::chrono::high_resolution_clock::now();
 
-    // Simulate 10,000 orders
-    for (int i = 0; i < 10000; i++) {
-        book.addOrder({ i + 100, OrderType::BUY, 99.00, 1 }); // Passive Buyers
+    for (int i = 0; i < 100000; i++) {
+        Order* newOrder = orderPool.acquire();
+
+        if (newOrder != nullptr) {
+            newOrder->id = i;
+            newOrder->type = OrderType::BUY;
+            newOrder->price = 99.00;
+            newOrder->quantity = 1;
+
+            book.addOrder(*newOrder);
+
+            orderPool.release(newOrder);
+        }
     }
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
 
-    std::cout << "Processed 10,000 orders in " << elapsed.count() << " seconds.\n";
-    std::cout << "Throughput: " << 10000 / elapsed.count() << " orders/second.\n";
+    std::cout << "Processed 100,000 orders in " << elapsed.count() << " seconds.\n";
+    std::cout << "Throughput: " << 100000 / elapsed.count() << " orders/second.\n";
 
     return 0;
 }

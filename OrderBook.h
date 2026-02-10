@@ -5,18 +5,15 @@
 #include <map>
 #include <vector>
 #include <iostream>
-#include <functional> // For std::greater
+#include <functional>
 
 class OrderBook {
 private:
-    // Bids: Sorted High -> Low (Best price to sell to is the Highest Bid)
     std::map<double, std::vector<Order>, std::greater<double>> bids;
-
-    // Asks: Sorted Low -> High (Best price to buy from is the Lowest Ask)
     std::map<double, std::vector<Order>, std::less<double>> asks;
 
 public:
-    // The Core Function: Takes an order and tries to match it
+    // Takes an order and tries to match it
     void addOrder(Order newOrder) {
         if (newOrder.type == OrderType::BUY) {
             matchBuyOrder(newOrder);
@@ -36,18 +33,20 @@ public:
             double bestAskPrice = bestAskIt->first;
             std::vector<Order>& sellOrders = bestAskIt->second;
 
-            // If the Seller is too expensive, we can't trade. Stop.
+            // If the Seller is too expensive, we can't trade. So stop here.
             if (bestAskPrice > order.price) {
                 break;
             }
 
             // TRADE EXECUTION LOGIC
-            Order& sellOrder = sellOrders.front(); // Priority: First In, First Out (FIFO)
+            Order& sellOrder = sellOrders.front();
 
             int quantityTraded = std::min(order.quantity, sellOrder.quantity);
 
-            /*std::cout << "[TRADE] Buy Order " << order.id << " matched with Sell Order "
-                << sellOrder.id << " for " << quantityTraded << " @ " << bestAskPrice << "\n";*/
+            /*
+            std::cout << "[TRADE] Buy Order " << order.id << " matched with Sell Order "
+                << sellOrder.id << " for " << quantityTraded << " @ " << bestAskPrice << "\n";
+                */
 
             // Update quantities
             order.quantity -= quantityTraded;
@@ -56,6 +55,7 @@ public:
             // If the Sell order is fully filled, remove it
             if (sellOrder.quantity == 0) {
                 sellOrders.erase(sellOrders.begin());
+
                 // If no more orders at this price, remove the price level
                 if (sellOrders.empty()) {
                     asks.erase(bestAskIt);
@@ -77,7 +77,8 @@ public:
             double bestBidPrice = bestBidIt->first;
             std::vector<Order>& buyOrders = bestBidIt->second;
 
-            if (bestBidPrice < order.price) { // Buyer is offering too little
+            // Buyer is offering too little
+            if (bestBidPrice < order.price) { 
                 break;
             }
 
