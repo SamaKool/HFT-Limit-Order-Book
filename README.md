@@ -15,7 +15,7 @@ A high-performance Limit Order Book (LOB) implementation in C++ designed for low
 * **Benchmarking:** Integrated `std::chrono` high-resolution clock for precise latency measurement.
 
 ## Performance Benchmarks
-Tested on [Your CPU Name, e.g., Intel Core i5/i7 / Apple M1]:
+Tested on Intel Core i3:
 
 | Metric | Result |
 | :--- | :--- |
